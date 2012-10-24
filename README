@@ -1,0 +1,15 @@
+Gopherize - A simple Web library for Go
+---------------------------------------
+
+Currently, main.go is just a sample of how to use gopherize. The library itself is in the src/gopherize directory.
+Doesn't do much yet, features are below:
+
+    func Connect(host string, port int) Gopherize
+
+A simple interface to "Dial". Just pass it the host and port, it will then return a Gopherize object
+
+    func Get(g Gopherize, page string) Gopherize
+
+Will check to see if the given page exists. If not, the Err field will be populated with the relevant error.
+If the get succeeds, then the Page field will change to the specified page and Err will be nil.
+This function will always return a Gopherize object.
