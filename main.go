@@ -35,7 +35,7 @@ func main() {
     
     fmt.Println("Connected to " + g.Host)
 
-    if status := g.Get("/about/"); status == false {
+    if status := g.Get("/asdsd/"); status == false {
         fmt.Fprintf(os.Stderr, "%s\n", g.Err)
         os.Exit(1)
     }

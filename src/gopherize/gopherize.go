@@ -34,7 +34,7 @@ func (g *Gopherize) Get(page string) bool {
 
     re404, err404 := regexp.Compile(`HTTP/1.1 404`)
     re200, err200 := regexp.Compile(`HTTP/1.1 200`)
-
+    re30x, err30x := regexp.Compile(`HTTP/1.1 30(\d+)`)
     if err404 != nil {
         g.Err = err404 
         return false
@@ -43,6 +43,11 @@ func (g *Gopherize) Get(page string) bool {
     if err200 != nil {
         g.Err = err200 
         return true
+    }
+
+    if err30x != nil {
+        g.Err = err30x
+        return false
     }
 
     for {
@@ -64,6 +69,12 @@ func (g *Gopherize) Get(page string) bool {
 
         if re404.Match(buf) {
             g.Err = errors.New("Page Not Found")
+            break
+        }
+
+        if re30x.Match(buf) {
+            number := re30x.FindStringSubmatch(string(buf))
+            g.Err = errors.New(fmt.Sprintf("30%s Redirect", number[1]))
             break
         }
 
