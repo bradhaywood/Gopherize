@@ -8,8 +8,8 @@ Doesn't do much yet, features are below:
 
 A simple interface to "Dial". Just pass it the host and port, it will then return a Gopherize object
 
-    func Get(g Gopherize, page string) Gopherize
+    func (g *Gopherize) Get(page string) bool
 
-Will check to see if the given page exists. If not, the Err field will be populated with the relevant error.
-If the get succeeds, then the Page field will change to the specified page and Err will be nil.
-This function will always return a Gopherize object.
+    ex: status := g.Get("/about")
+
+Checks if the given page exists. Returns 'true' or 'false' boolean.

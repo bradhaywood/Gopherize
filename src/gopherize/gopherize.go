@@ -15,13 +15,18 @@ type Gopherize struct {
     Err  error
 }
 
+/*type Links struct {
+    name string
+    url  string
+}*/
+
 func Connect(host string, port int) Gopherize {
     conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
     var gopherize = Gopherize{conn, "/", host, port, err }
     return gopherize
 }
 
-func Get(g Gopherize, page string) Gopherize {
+func (g *Gopherize) Get(page string) bool {
     buf := make([]byte, 1024)
     foundOk := false
     fmt.Fprintf(g.Conn, "HEAD %s HTTP/1.1\r\n", page)
@@ -32,12 +37,12 @@ func Get(g Gopherize, page string) Gopherize {
 
     if err404 != nil {
         g.Err = err404 
-        return g
+        return false
     }
 
     if err200 != nil {
         g.Err = err200 
-        return g
+        return true
     }
 
     for {
@@ -68,7 +73,9 @@ func Get(g Gopherize, page string) Gopherize {
     if foundOk == true {
         g.Page = page
         g.Err  = nil
+        return true
     }
 
-    return g
+    return false
 }
+

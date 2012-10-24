@@ -35,7 +35,7 @@ func main() {
     
     fmt.Println("Connected to " + g.Host)
 
-    if g = gopherize.Get(g, "/notexists/"); g.Err != nil {
+    if status := g.Get("/about/"); status == false {
         fmt.Fprintf(os.Stderr, "%s\n", g.Err)
         os.Exit(1)
     }
