@@ -90,3 +90,35 @@ func (g *Gopherize) Get(page string) bool {
     return false
 }
 
+func (g *Gopherize) Links() ([]string, error) {
+    buf := make([]byte, 1024)
+    fmt.Fprintf(g.Conn, "GET %s HTTP/1.1\r\n", g.Page)
+    fmt.Fprintf(g.Conn, "Host: %s:%d\r\n\r\n", g.Host, g.Port)
+
+    var links []string
+    var readlen int
+    linkRegex, err := regexp.Compile(`<a\s[^>]*href\s*=\s*\"([^\"]*)\"[^>]*>(.*?)</a>`)
+    if err != nil {
+        return links, err
+    }
+
+    for {
+        readlen, err = g.Conn.Read(buf)
+        if readlen == 0 {
+            break
+        }
+
+        if err != nil {
+            return links, err
+        }
+
+        //fmt.Printf("%s\n", buf)
+        if linkRegex.Match(buf) {
+            server := linkRegex.FindStringSubmatch(string(buf))
+            links = append(links, server[1])
+        }
+    }
+
+    return links, nil
+}
+

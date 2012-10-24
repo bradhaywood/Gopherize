@@ -35,10 +35,21 @@ func main() {
     
     fmt.Println("Connected to " + g.Host)
 
-    if status := g.Get("/asdsd/"); status == false {
+    if status := g.Get("/"); status == false {
         fmt.Fprintf(os.Stderr, "%s\n", g.Err)
         os.Exit(1)
     }
 
     fmt.Println("Found page " + g.Page)
+    
+    links, err := g.Links()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error getting links: %s\n", err)
+        os.Exit(1)
+    }
+
+    fmt.Println(len(links))
+    for i := range links {
+        fmt.Println(links[i])
+    }
 }
