@@ -48,7 +48,6 @@ func main() {
         os.Exit(1)
     }
 
-    fmt.Println(len(links))
     for i := range links {
         fmt.Println(links[i])
     }
