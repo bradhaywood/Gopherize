@@ -12,23 +12,18 @@ type Gopherize struct {
     Page string
     Host string
     Port int
-    Err  error
 }
 
-/*type Links struct {
-    name string
-    url  string
-}*/
-
-func Connect(host string, port int) Gopherize {
+func Connect(host string, port int) (Gopherize, error) {
     conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
-    var gopherize = Gopherize{conn, "/", host, port, err }
-    return gopherize
+    var gopherize = Gopherize{conn, "/", host, port }
+    return gopherize, err
 }
 
-func (g *Gopherize) Get(page string) bool {
+func (g *Gopherize) Get(page string) (bool, error) {
     buf := make([]byte, 1024)
     foundOk := false
+    var returnError error
     fmt.Fprintf(g.Conn, "HEAD %s HTTP/1.1\r\n", page)
     fmt.Fprintf(g.Conn, "Host: %s:%d\r\n\r\n", g.Host, g.Port)
 
@@ -36,25 +31,22 @@ func (g *Gopherize) Get(page string) bool {
     re200, err200 := regexp.Compile(`HTTP/1.1 200`)
     re30x, err30x := regexp.Compile(`HTTP/1.1 30(\d+)`)
     if err404 != nil {
-        g.Err = err404 
-        return false
+        return false, err404
     }
 
     if err200 != nil {
-        g.Err = err200 
-        return true
+        return false, err200
     }
 
     if err30x != nil {
-        g.Err = err30x
-        return false
+        return false, err30x
     }
 
     for {
         readlen, err := g.Conn.Read(buf)
 
         if err != nil {
-            g.Err = err
+            returnError = errors.New(fmt.Sprintf("Problem reading data (%s)", err))
             break
         }
 
@@ -68,26 +60,25 @@ func (g *Gopherize) Get(page string) bool {
         }
 
         if re404.Match(buf) {
-            g.Err = errors.New("Page Not Found")
+            returnError = errors.New("Page Not Found")
             break
         }
 
         if re30x.Match(buf) {
             number := re30x.FindStringSubmatch(string(buf))
-            g.Err = errors.New(fmt.Sprintf("30%s Redirect", number[1]))
+            returnError = errors.New(fmt.Sprintf("30%s Redirect", number[1]))
             break
         }
 
-        fmt.Printf("%s\n", buf)
+        //fmt.Printf("%s\n", buf)
     }
 
     if foundOk == true {
         g.Page = page
-        g.Err  = nil
-        return true
+        return true, nil
     }
 
-    return false
+    return false, returnError
 }
 
 func (g *Gopherize) Links() ([]string, error) {

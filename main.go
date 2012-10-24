@@ -26,17 +26,17 @@ func main() {
         }
     }
 
-    g := gopherize.Connect(host, port)
+    g, err := gopherize.Connect(host, port)
     
-    if g.Err != nil {
-        fmt.Fprintf(os.Stderr, "Problem connecting: %s\n", g.Err)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Problem connecting: %s\n", err)
         os.Exit(1)
     }
     
     fmt.Println("Connected to " + g.Host)
 
-    if status := g.Get("/"); status == false {
-        fmt.Fprintf(os.Stderr, "%s\n", g.Err)
+    if status, err := g.Get("/"); status == false {
+        fmt.Fprintf(os.Stderr, "%s\n", err)
         os.Exit(1)
     }
 
@@ -48,7 +48,7 @@ func main() {
         os.Exit(1)
     }
 
-    for i := range links {
-        fmt.Println(links[i])
+    for _, link := range links {
+        fmt.Println(link)
     }
 }
